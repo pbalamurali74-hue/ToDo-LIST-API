@@ -9,8 +9,12 @@ from app.database import engine, Base
 from app.middleware import limiter, rate_limit_handler
 from app.routers import auth, todos
 
-# Create database tables automatically
-Base.metadata.create_all(bind=engine)
+# Create database tables automatically, catching errors to avoid startup crashes
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    import sys
+    print(f"⚠️ Database creation warning: {e}", file=sys.stderr)
 
 app = FastAPI(
     title="To-Do List RESTful API",
