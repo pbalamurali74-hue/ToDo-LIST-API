@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taskflow - Secure To-Do Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0b0f19;
+      --bg-gradient: radial-gradient(circle at top right, #1a2035, #0b0f19);
+      --card-bg: rgba(17, 24, 39, 0.55);
+      --card-border: rgba(255, 255, 255, 0.07);
+      --input-bg: rgba(255, 255, 255, 0.03);
+      --input-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --primary-glow: rgba(59, 130, 246, 0.25);
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.15);
+      --danger: #f43f5e;
+      --danger-hover: #e11d48;
+      --danger-glow: rgba(244, 63, 94, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      background-image: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, .brand {
+      font-family: 'Outfit', sans-serif;
+    }
+
+    /* Container */
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      min-height: 100vh;
+    }
+
+    /* Auth Screen */
+    .auth-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 4rem);
+    }
+
+    .auth-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 20px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .auth-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(135deg, #60a5fa, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .auth-subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .auth-tabs {
+      display: flex;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 10px;
+      padding: 0.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 0.6rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .auth-tab.active {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-group label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .form-control {
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-family: inherit;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      outline: none;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #4f46e5, #3b82f6);
+      transform: translateY(-1px);
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    .btn-text {
+      background: none;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 400;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .btn-text:hover {
+      color: #fff;
+    }
+
+    .error-banner {
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: #fda4af;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 1.25rem;
+      display: none;
+      animation: shake 0.3s ease-in-out;
+    }
+
+    /* Dashboard Header */
+    .dashboard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 1.25rem 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .dashboard-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: #fff;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .username {
+      font-weight: 500;
+      color: #fff;
+    }
+
+    /* Dashboard Content Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 820px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .dashboard-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 1.75rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      height: fit-content;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Todos Toolbar */
+    .todo-toolbar {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-wrapper {
+      position: relative;
+    }
+
+    .search-input {
+      padding-left: 2.5rem;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-tabs {
+      display: flex;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 8px;
+      padding: 0.2rem;
+    }
+
+    .filter-tab {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+      font-family: inherit;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .filter-tab.active {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .sort-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .select-control {
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      color: #fff;
+      border-radius: 6px;
+      padding: 0.35rem 0.75rem;
+      outline: none;
+      font-family: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    /* Task List */
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      min-height: 200px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      padding: 1rem;
+      transition: all 0.2s;
+    }
+
+    .task-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .task-checkbox {
+      margin-top: 0.2rem;
+      width: 1.15rem;
+      height: 1.15rem;
+      border-radius: 4px;
+      border: 2px solid var(--input-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .task-checkbox.checked {
+      background-color: var(--success);
+      border-color: var(--success);
+    }
+
+    .task-checkbox svg {
+      opacity: 0;
+      color: #fff;
+      width: 0.8rem;
+      height: 0.8rem;
+      transition: opacity 0.15s;
+    }
+
+    .task-checkbox.checked svg {
+      opacity: 1;
+    }
+
+    .task-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .task-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #fff;
+      transition: all 0.2s;
+    }
+
+    .task-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    .task-item.completed .task-title {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .task-item.completed .task-desc {
+      color: rgba(156, 163, 175, 0.5);
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 0.5rem;
+      align-self: center;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.35rem;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .action-btn.btn-delete:hover {
+      background: var(--danger-glow);
+      color: var(--danger);
+    }
+
+    /* Edit Mode */
+    .edit-mode-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    /* Pagination */
+    .pagination-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .pagination-btns {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .page-btn {
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      color: #fff;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .page-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .page-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Empty state */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+      text-align: center;
+      gap: 0.75rem;
+    }
+
+    .empty-icon {
+      width: 3rem;
+      height: 3rem;
+      color: rgba(255, 255, 255, 0.1);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      border-top: 2px solid var(--primary);
+      width: 1.25rem;
+      height: 1.25rem;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="app">
+    <!-- 1. AUTH SCREEN -->
+    <div class="auth-wrapper" id="authScreen">
+      <div class="auth-card">
+        <div class="auth-header">
+          <div class="auth-logo">
+            <svg style="width:1.8rem; height:1.8rem;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+            </svg>
+            <span>Taskflow</span>
+          </div>
+          <p class="auth-subtitle" id="authSubtitle">Manage your tasks elegantly</p>
+        </div>
+
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Login</button>
+          <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">Register</button>
+        </div>
+
+        <div class="error-banner" id="authError"></div>
+
+        <form id="authForm" onsubmit="handleAuthSubmit(event)">
+          <!-- Register fields -->
+          <div class="form-group" id="groupName" style="display:none;">
+            <label for="regName">Name</label>
+            <input type="text" class="form-control" id="regName" placeholder="John Doe">
+          </div>
+
+          <div class="form-group">
+            <label for="authEmail">Email</label>
+            <input type="email" class="form-control" id="authEmail" required placeholder="john@doe.com">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 2rem;">
+            <label for="authPassword">Password</label>
+            <input type="password" class="form-control" id="authPassword" required placeholder="••••••••">
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="authSubmitBtn">
+            <span>Continue</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 2. DASHBOARD SCREEN -->
+    <div id="dashboardScreen" style="display:none; display: flex; flex-direction: column; gap: 2rem;">
+      <!-- Dashboard Header -->
+      <header class="dashboard-header">
+        <div class="dashboard-logo">
+          <svg style="width:1.5rem; height:1.5rem;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+          </svg>
+          <span>Taskflow</span>
+        </div>
+        <div class="user-profile">
+          <span class="username" id="displayUsername">User</span>
+          <button class="btn btn-text" onclick="handleLogout()" style="display:flex; align-items:center; gap:0.4rem;">
+            <svg style="width:1rem; height:1rem;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+            <span>Log out</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Dashboard Grid -->
+      <div class="dashboard-grid">
+        <!-- Create Form Card -->
+        <div class="dashboard-card">
+          <h2 class="card-title">
+            <svg style="width:1.25rem; height:1.25rem;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span>Create New Task</span>
+          </h2>
+          <div class="error-banner" id="createError"></div>
+          <form id="createTodoForm" onsubmit="handleCreateTodo(event)">
+            <div class="form-group">
+              <label for="todoTitle">Title</label>
+              <input type="text" class="form-control" id="todoTitle" required placeholder="Buy groceries">
+            </div>
+            <div class="form-group" style="margin-bottom:1.5rem;">
+              <label for="todoDesc">Description</label>
+              <textarea class="form-control" id="todoDesc" rows="3" placeholder="Milk, organic eggs, bread..." style="resize:none;"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" id="createSubmitBtn">
+              <span>Create Task</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Todo List Card -->
+        <div class="dashboard-card" style="min-height:480px; display:flex; flex-direction:column;">
+          <h2 class="card-title">
+            <svg style="width:1.25rem; height:1.25rem;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+            </svg>
+            <span>My Tasks</span>
+          </h2>
+
+          <!-- Toolbar -->
+          <div class="todo-toolbar">
+            <div class="search-wrapper">
+              <svg class="search-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              <input type="text" class="form-control search-input" id="todoSearch" placeholder="Search tasks..." oninput="triggerSearch()">
+            </div>
+
+            <div class="toolbar-actions">
+              <!-- Filter Tabs -->
+              <div class="filter-tabs">
+                <button class="filter-tab active" id="filterAll" onclick="setFilter('all')">All</button>
+                <button class="filter-tab" id="filterPending" onclick="setFilter('pending')">Pending</button>
+                <button class="filter-tab" id="filterCompleted" onclick="setFilter('completed')">Completed</button>
+              </div>
+
+              <!-- Sorting -->
+              <div class="sort-wrapper">
+                <span>Sort by:</span>
+                <select class="select-control" id="todoSortBy" onchange="triggerSort()">
+                  <option value="created_at">Date Created</option>
+                  <option value="title">Title</option>
+                  <option value="completed">Status</option>
+                </select>
+                <select class="select-control" id="todoSortOrder" onchange="triggerSort()">
+                  <option value="desc">Desc</option>
+                  <option value="asc">Asc</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tasks List Container -->
+          <div class="task-list" id="taskListContainer">
+            <div class="empty-state">
+              <div class="spinner"></div>
+              <p>Loading tasks...</p>
+            </div>
+          </div>
+
+          <!-- Pagination Bar -->
+          <div class="pagination-bar" id="paginationBar" style="display:none;">
+            <span id="paginationSummary">Showing 0-0 of 0</span>
+            <div class="pagination-btns">
+              <button class="page-btn" id="prevPageBtn" onclick="changePage(-1)">Previous</button>
+              <button class="page-btn" id="nextPageBtn" onclick="changePage(1)">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State Variables
+    let currentMode = 'login'; // login | register
+    let userToken = localStorage.getItem('token') || '';
+    let refreshToken = localStorage.getItem('refreshToken') || '';
+    let currentPage = 1;
+    let limitPerPage = 5;
+    let activeFilter = 'all'; // all | pending | completed
+    let activeSearch = '';
+    let activeSortBy = 'created_at';
+    let activeSortOrder = 'desc';
+
+    const API_URL = ''; // Local endpoints relative to server
+
+    // On Load
+    document.addEventListener('DOMContentLoaded', () => {
+      initSession();
+    });
+
+    // Helper: Initialize Session
+    function initSession() {
+      if (userToken) {
+        // Try parsing user name from token payload
+        try {
+          const payload = JSON.parse(atob(userToken.split('.')[1]));
+          // If we had the name in the payload, show it. Otherwise query it.
+          // Since our token payload only contains sub (userId), let's greeting
+          document.getElementById('displayUsername').innerText = "Account Owner";
+        } catch (e) {}
+
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('dashboardScreen').style.display = 'flex';
+        fetchTodos();
+      } else {
+        document.getElementById('authScreen').style.display = 'flex';
+        document.getElementById('dashboardScreen').style.display = 'none';
+      }
+    }
+
+    // Switch between Login and Register tabs
+    function switchAuthTab(mode) {
+      currentMode = mode;
+      document.getElementById('authError').style.display = 'none';
+      
+      const tabLogin = document.getElementById('tabLogin');
+      const tabRegister = document.getElementById('tabRegister');
+      const groupName = document.getElementById('groupName');
+      const subtitle = document.getElementById('authSubtitle');
+      const submitBtn = document.getElementById('authSubmitBtn');
+
+      if (mode === 'register') {
+        tabLogin.classList.remove('active');
+        tabRegister.classList.add('active');
+        groupName.style.display = 'flex';
+        subtitle.innerText = 'Create an account to start managing tasks';
+        submitBtn.querySelector('span').innerText = 'Register';
+        document.getElementById('regName').required = true;
+      } else {
+        tabLogin.classList.add('active');
+        tabRegister.classList.remove('active');
+        groupName.style.display = 'none';
+        subtitle.innerText = 'Manage your tasks elegantly';
+        submitBtn.querySelector('span').innerText = 'Continue';
+        document.getElementById('regName').required = false;
+      }
+    }
+
+    // Handle authentication form submission
+    async function handleAuthSubmit(event) {
+      event.preventDefault();
+      const errorBanner = document.getElementById('authError');
+      errorBanner.style.display = 'none';
+      
+      const email = document.getElementById('authEmail').value;
+      const password = document.getElementById('authPassword').value;
+      const submitBtn = document.getElementById('authSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.querySelector('span').innerHTML = '<div class="spinner"></div>';
+
+      const url = currentMode === 'register' ? `${API_URL}/register` : `${API_URL}/login`;
+      const body = currentMode === 'register' 
+        ? { name: document.getElementById('regName').value, email, password }
+        : { email, password };
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.detail || data.message || 'Authentication failed');
+        }
+
+        // Save tokens
+        userToken = data.token;
+        refreshToken = data.refreshToken;
+        localStorage.setItem('token', userToken);
+        localStorage.setItem('refreshToken', refreshToken);
+
+        // Reset form
+        document.getElementById('authForm').reset();
+        
+        // Load dashboard
+        initSession();
+      } catch (err) {
+        errorBanner.innerText = err.message;
+        errorBanner.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.querySelector('span').innerText = currentMode === 'register' ? 'Register' : 'Continue';
+      }
+    }
+
+    // Custom fetch wrapper handling 401 token refresh automatically
+    async function authenticatedFetch(url, options = {}) {
+      if (!userToken) {
+        handleLogout();
+        return;
+      }
+
+      options.headers = options.headers || {};
+      options.headers['Authorization'] = `Bearer ${userToken}`;
+
+      let response = await fetch(url, options);
+
+      if (response.status === 401 && refreshToken) {
+        // Access token might be expired, try refreshing
+        const refreshed = await attemptTokenRefresh();
+        if (refreshed) {
+          // Retry the request with the new access token
+          options.headers['Authorization'] = `Bearer ${userToken}`;
+          response = await fetch(url, options);
+        } else {
+          handleLogout();
+          throw new Error('Session expired, please log in again.');
+        }
+      }
+
+      return response;
+    }
+
+    // Attempt token refresh from /refresh endpoint
+    async function attemptTokenRefresh() {
+      try {
+        const resp = await fetch(`${API_URL}/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken })
+        });
+        
+        if (!resp.ok) return false;
+        
+        const data = await resp.json();
+        userToken = data.token;
+        localStorage.setItem('token', userToken);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    // Logout
+    async function handleLogout() {
+      if (refreshToken) {
+        // Notify backend to invalidate refresh session
+        try {
+          await fetch(`${API_URL}/logout`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refreshToken })
+          });
+        } catch (e) {}
+      }
+
+      userToken = '';
+      refreshToken = '';
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      
+      document.getElementById('authScreen').style.display = 'flex';
+      document.getElementById('dashboardScreen').style.display = 'none';
+    }
+
+    // Fetch todos
+    async function fetchTodos() {
+      const taskContainer = document.getElementById('taskListContainer');
+      const pageBar = document.getElementById('paginationBar');
+      
+      let url = `${API_URL}/todos/?page=${currentPage}&limit=${limitPerPage}&sort_by=${activeSortBy}&sort_order=${activeSortOrder}`;
+      
+      if (activeFilter === 'completed') {
+        url += '&completed=true';
+      } else if (activeFilter === 'pending') {
+        url += '&completed=false';
+      }
+
+      if (activeSearch) {
+        url += `&search=${encodeURIComponent(activeSearch)}`;
+      }
+
+      try {
+        const response = await authenticatedFetch(url);
+        if (!response.ok) {
+          throw new Error('Failed to retrieve tasks.');
+        }
+
+        const resData = await response.json();
+        renderTaskList(resData.data);
+        renderPagination(resData.page, resData.limit, resData.total);
+      } catch (err) {
+        taskContainer.innerHTML = `<div class="empty-state"><p style="color:var(--danger)">Error: ${err.message}</p></div>`;
+        pageBar.style.display = 'none';
+      }
+    }
+
+    // Render task items list
+    function renderTaskList(todos) {
+      const taskContainer = document.getElementById('taskListContainer');
+      
+      if (!todos || todos.length === 0) {
+        taskContainer.innerHTML = `
+          <div class="empty-state">
+            <svg class="empty-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p>No tasks found. Create a new task to get started!</p>
+          </div>
+        `;
+        return;
+      }
+
+      taskContainer.innerHTML = '';
+      todos.forEach(todo => {
+        const item = document.createElement('div');
+        item.className = `task-item ${todo.completed ? 'completed' : ''}`;
+        item.id = `todo-${todo.id}`;
+
+        item.innerHTML = `
+          <div class="task-checkbox ${todo.completed ? 'checked' : ''}" onclick="toggleTodoStatus('${todo.id}', ${todo.completed})">
+            <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <div class="task-details" id="details-${todo.id}">
+            <div class="task-title">${escapeHTML(todo.title)}</div>
+            ${todo.description ? `<div class="task-desc">${escapeHTML(todo.description)}</div>` : ''}
+          </div>
+          <div class="task-actions" id="actions-${todo.id}">
+            <button class="action-btn" onclick="enterEditMode('${todo.id}', \`${escapeJS(todo.title)}\`, \`${escapeJS(todo.description || '')}\`)">
+              <svg style="width:1.05rem; height:1.05rem;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+              </svg>
+            </button>
+            <button class="action-btn btn-delete" onclick="handleDeleteTodo('${todo.id}')">
+              <svg style="width:1.05rem; height:1.05rem;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+            </button>
+          </div>
+        `;
+        taskContainer.appendChild(item);
+      });
+    }
+
+    // Toggle todo completion
+    async function toggleTodoStatus(todoId, currentStatus) {
+      try {
+        const response = await authenticatedFetch(`${API_URL}/todos/${todoId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ completed: !currentStatus })
+        });
+        
+        if (response.ok) {
+          fetchTodos();
+        }
+      } catch (err) {}
+    }
+
+    // Create Todo
+    async function handleCreateTodo(event) {
+      event.preventDefault();
+      const titleInput = document.getElementById('todoTitle');
+      const descInput = document.getElementById('todoDesc');
+      const errorBanner = document.getElementById('createError');
+      const submitBtn = document.getElementById('createSubmitBtn');
+
+      errorBanner.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.querySelector('span').innerHTML = '<div class="spinner"></div>';
+
+      try {
+        const response = await authenticatedFetch(`${API_URL}/todos/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: titleInput.value,
+            description: descInput.value
+          })
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.detail || data.message || 'Creation failed');
+        }
+
+        // Reset inputs
+        titleInput.value = '';
+        descInput.value = '';
+        
+        // Refresh todo list
+        currentPage = 1;
+        fetchTodos();
+      } catch (err) {
+        errorBanner.innerText = err.message;
+        errorBanner.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.querySelector('span').innerText = 'Create Task';
+      }
+    }
+
+    // Enter Edit Mode in task item list
+    function enterEditMode(todoId, title, description) {
+      const detailsContainer = document.getElementById(`details-${todoId}`);
+      const actionsContainer = document.getElementById(`actions-${todoId}`);
+      
+      // Save original HTML in case user cancels
+      const originalDetails = detailsContainer.innerHTML;
+      const originalActions = actionsContainer.innerHTML;
+
+      detailsContainer.innerHTML = `
+        <div class="edit-mode-container">
+          <input type="text" class="form-control" id="edit-title-${todoId}" value="${escapeHTML(title)}" required>
+          <textarea class="form-control" id="edit-desc-${todoId}" rows="2" style="resize:none;">${escapeHTML(description)}</textarea>
+        </div>
+      `;
+
+      actionsContainer.innerHTML = `
+        <button class="action-btn" onclick="saveTodoEdits('${todoId}')" style="color:var(--success)">
+          <svg style="width:1.1rem; height:1.1rem;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </button>
+        <button class="action-btn" onclick="fetchTodos()" style="color:var(--danger)">
+          <svg style="width:1.1rem; height:1.1rem;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      `;
+    }
+
+    // Save edited todo details
+    async function saveTodoEdits(todoId) {
+      const title = document.getElementById(`edit-title-${todoId}`).value;
+      const description = document.getElementById(`edit-desc-${todoId}`).value;
+
+      try {
+        const response = await authenticatedFetch(`${API_URL}/todos/${todoId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, description })
+        });
+        
+        if (response.ok) {
+          fetchTodos();
+        }
+      } catch (err) {}
+    }
+
+    // Delete Todo
+    async function handleDeleteTodo(todoId) {
+      if (!confirm('Are you sure you want to delete this task?')) return;
+      
+      try {
+        const response = await authenticatedFetch(`${API_URL}/todos/${todoId}`, {
+          method: 'DELETE'
+        });
+        
+        if (response.status === 204 || response.ok) {
+          fetchTodos();
+        }
+      } catch (err) {}
+    }
+
+    // Render Pagination summaries and disabled states
+    function renderPagination(page, limit, total) {
+      const pageBar = document.getElementById('paginationBar');
+      if (total === 0) {
+        pageBar.style.display = 'none';
+        return;
+      }
+
+      pageBar.style.display = 'flex';
+      const start = (page - 1) * limit + 1;
+      const end = Math.min(page * limit, total);
+      
+      document.getElementById('paginationSummary').innerText = `Showing ${start}-${end} of ${total}`;
+      
+      const prevBtn = document.getElementById('prevPageBtn');
+      const nextBtn = document.getElementById('nextPageBtn');
+      
+      prevBtn.disabled = page <= 1;
+      nextBtn.disabled = end >= total;
+    }
+
+    // Change current page in pagination
+    function changePage(direction) {
+      currentPage += direction;
+      fetchTodos();
+    }
+
+    // Filter by completed status tabs
+    function setFilter(filter) {
+      activeFilter = filter;
+      document.getElementById('filterAll').classList.toggle('active', filter === 'all');
+      document.getElementById('filterPending').classList.toggle('active', filter === 'pending');
+      document.getElementById('filterCompleted').classList.toggle('active', filter === 'completed');
+      
+      currentPage = 1;
+      fetchTodos();
+    }
+
+    // Debounce live searching
+    let searchDebounceTimer;
+    function triggerSearch() {
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        activeSearch = document.getElementById('todoSearch').value;
+        currentPage = 1;
+        fetchTodos();
+      }, 300);
+    }
+
+    // Trigger Sorting
+    function triggerSort() {
+      activeSortBy = document.getElementById('todoSortBy').value;
+      activeSortOrder = document.getElementById('todoSortOrder').value;
+      currentPage = 1;
+      fetchTodos();
+    }
+
+    // Utility: HTML Escaping
+    function escapeHTML(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Utility: JS String Escaping
+    function escapeJS(str) {
+      if (!str) return '';
+      return str
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r');
+    }
+  </script>
+</body>
+</html>
