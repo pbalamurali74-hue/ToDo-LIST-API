@@ -71,11 +71,13 @@ app.include_router(auth.router, tags=["Authentication"])
 app.include_router(todos.router, prefix="/todos", tags=["Todos"])
 
 # Ensure static files directory exists and mount it
-os.makedirs("app/static", exist_ok=True)
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+static_dir = os.path.join(BASE_DIR, "static")
+os.makedirs(static_dir, exist_ok=True)
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 
 # Serve the user-friendly Single-Page Application (SPA) dashboard at the root
 @app.get("/")
 async def read_index():
-    return FileResponse("app/static/index.html")
+    return FileResponse(os.path.join(static_dir, "index.html"))
