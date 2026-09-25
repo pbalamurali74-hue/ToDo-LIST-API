@@ -7,8 +7,8 @@ from sqlalchemy.orm import sessionmaker
 # Force test configuration before importing app modules
 os.environ["APP_ENV"] = "test"
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
-os.environ["JWT_ACCESS_SECRET"] = "test-secret-access-key-12345"
-os.environ["JWT_REFRESH_SECRET"] = "test-secret-refresh-key-12345"
+os.environ["JWT_ACCESS_SECRET"] = "test-secret-access-key-12345-very-secure-32bytes"
+os.environ["JWT_REFRESH_SECRET"] = "test-secret-refresh-key-12345-very-secure-32bytes"
 
 from app.database import Base, get_db
 from app.main import app

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
@@ -52,7 +52,7 @@ async def register(request: Request, user_data: UserRegister, db: Session = Depe
     refresh_token = create_refresh_token(new_user.id)
 
     # Save refresh token to db
-    expires_at = datetime.utcnow() + timedelta(days=7)
+    expires_at = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=7)
     db_refresh_token = RefreshToken(
         token=refresh_token,
         user_id=new_user.id,
@@ -79,7 +79,7 @@ async def login(request: Request, credentials: UserLogin, db: Session = Depends(
     refresh_token = create_refresh_token(user.id)
 
     # Save refresh token
-    expires_at = datetime.utcnow() + timedelta(days=7)
+    expires_at = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=7)
     db_refresh_token = RefreshToken(
         token=refresh_token,
         user_id=user.id,
@@ -113,7 +113,7 @@ async def refresh(refresh_data: RefreshRequest, db: Session = Depends(get_db)):
             detail="Refresh token not recognized",
         )
 
-    if db_token.expires_at < datetime.utcnow():
+    if db_token.expires_at < datetime.now(timezone.utc).replace(tzinfo=None):
         db.delete(db_token)
         db.commit()
         raise HTTPException(
