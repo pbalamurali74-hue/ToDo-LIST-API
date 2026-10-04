@@ -1,118 +1,143 @@
-# 📝 Secure To-Do List RESTful API (Python FastAPI)
+# 🔐 Secure To-Do REST API
 
-A state-of-the-art, secure, and fully-tested RESTful API built in Python using **FastAPI**, **SQLAlchemy ORM**, **Pydantic validation**, and **SQLite**. It features JWT-based authentication, a refresh token mechanism, pagination, custom search filters, global and auth-endpoint rate limiting, and cascade database deletion rules.
+A production-oriented **REST API built with Python and FastAPI**, focused on authentication, authorization, database persistence, validation, testing and API security.
 
----
+## 🚀 What it does
 
-## 🚀 Key Features
+This project provides a secure backend for managing user accounts and personal To-Do tasks.
 
-1. **User Authentication**: Secure register and login endpoints with password hashing using `bcrypt`.
-2. **Access & Refresh Tokens**: Dual-token mechanism with 15-minute access tokens and 7-day refresh tokens stored in the database for session revocation.
-3. **Pydantic Validation**: Automatic incoming request payload validation yielding structured `400 Bad Request` messages upon failure.
-4. **CRUD with Access Controls**: Task owners can fully manage their items; unauthorized users or non-creators are guarded with `401 Unauthorized` and `403 Forbidden` statuses.
-5. **Advanced Queries**: Full support for offset-based pagination (`page` and `limit`), keyword search filtering on title/description, completion status filtering, and sorting (`asc` / `desc`).
-6. **Rate Limiting**: Prevent brute-force and DDoS attempts using `slowapi` (configured at 15 attempts/15 mins for auth, 100/15 mins globally).
-7. **Database Cascading**: When a user is deleted, all their associated tasks and refresh sessions are immediately cascaded and pruned.
+### Core features
 
----
+- JWT access and refresh-token authentication
+- Password hashing with bcrypt
+- User registration, login, refresh and logout
+- Authenticated To-Do CRUD operations
+- Search, filtering, pagination and sorting
+- Task ownership and authorization checks
+- API rate limiting with SlowAPI
+- SQLAlchemy ORM + SQLite
+- Cascade deletion for user-owned data
+- Automated API integration tests
+- Automatic Swagger/OpenAPI documentation
+
+## 🏗️ Architecture
+
+```
+Client
+  ↓
+FastAPI
+  ↓
+Authentication + Validation + Rate Limiting
+  ↓
+API Routers
+  ↓
+SQLAlchemy ORM
+  ↓
+SQLite
+```
+
+## 🧰 Tech Stack
+
+**Python • FastAPI • SQLAlchemy • Pydantic • JWT • bcrypt • SQLite • SlowAPI • Uvicorn • Pytest**
 
 ## 📁 Project Structure
 
 ```
+ToDo-LIST-API/
 ├── app/
-│   ├── __init__.py
-│   ├── config.py             # Typed configuration loader (Pydantic Settings)
-│   ├── database.py           # SQLite connection & SessionLocal factory
-│   ├── main.py               # FastAPI entrypoint, middleware, routers, & exception overrides
-│   ├── models.py             # Declarative SQLAlchemy models (User, Todo, RefreshToken)
-│   ├── schemas.py            # Input validation & output formatting (Pydantic schemas)
-│   ├── security.py           # Hashing and JWT sign/verify utilities
-│   ├── middleware.py         # SlowAPI Limiter instantiation & rate handlers
+│   ├── config.py
+│   ├── database.py
+│   ├── main.py
+│   ├── models.py
+│   ├── schemas.py
+│   ├── security.py
+│   ├── middleware.py
 │   └── routers/
-│       ├── __init__.py
-│       ├── auth.py           # Authentication endpoints (/register, /login, /refresh, /logout)
-│       └── todos.py          # To-do CRUD endpoints (/todos/)
+│       ├── auth.py
+│       └── todos.py
 ├── tests/
-│   ├── __init__.py
-│   ├── conftest.py           # Pytest fixtures & isolated in-memory test DB configuration
-│   ├── test_auth.py          # Auth endpoint integration tests
-│   └── test_todos.py         # To-do CRUD integration tests
-├── .env                      # Application environment variables (gitignored in prod)
-├── requirements.txt          # Package dependencies
-├── verify.sh                 # End-to-end curl verification script
-└── README.md                 # Detailed documentation
+│   ├── conftest.py
+│   ├── test_auth.py
+│   └── test_todos.py
+├── requirements.txt
+├── verify.sh
+└── README.md
 ```
 
----
+## ⚙️ Run locally
 
-## 🛠️ Setup & Installation
-
-### 1. Prerequisites
-Ensure you have **Python 3.9+** and `pip` installed.
-
-### 2. Install Dependencies
-Install all package requirements:
 ```bash
+git clone https://github.com/pbalamurali74-hue/ToDo-LIST-API.git
+cd ToDo-LIST-API
 python3 -m pip install -r requirements.txt
-```
-
-### 3. Environment Variables
-Create a `.env` file in the root directory (or use the preconfigured one):
-```env
-PORT=8000
-DATABASE_URL="sqlite:///./todo.db"
-JWT_ACCESS_SECRET="super-secret-access-token-key-change-this-in-production"
-JWT_REFRESH_SECRET="super-secret-refresh-token-key-change-this-in-production"
-APP_ENV="development"
-```
-
----
-
-## 🚀 Running the Server
-
-Start the application locally using Uvicorn:
-```bash
 python3 -m uvicorn app.main:app --reload
 ```
-Once started, the API will be listening on `http://localhost:8000`. You can visit `http://localhost:8000/docs` to interact with the API directly using the autogenerated Swagger UI.
 
----
+Swagger API documentation:
 
-## 🧪 Running Automated Tests
+```
+http://localhost:8000/docs
+```
 
-Run the complete integration and unit test suite via `pytest`:
+## 🔐 Environment variables
+
+Create a `.env` file:
+
+```env
+PORT=8000
+DATABASE_URL=sqlite:///./todo.db
+JWT_ACCESS_SECRET=change-this-secret
+JWT_REFRESH_SECRET=change-this-refresh-secret
+APP_ENV=development
+```
+
+Use your own production secrets and never commit real credentials.
+
+## 🧪 Testing
+
 ```bash
 python3 -m pytest
 ```
-*Note: The test suite uses a transactional, in-memory SQLite instance (`sqlite:///:memory:`) which resets and rolls back after each test case, leaving your local `todo.db` completely unaffected.*
 
----
+Manual verification:
 
-## 🔍 Manual Endpoint Verification
+```bash
+./verify.sh
+```
 
-We have supplied a manual verification script `verify.sh` that makes actual HTTP requests to a running instance of the API using `curl`.
+## 📡 API
 
-To run the manual validation:
-1. Ensure the server is running in one terminal:
-   ```bash
-   python3 -m uvicorn app.main:app
-   ```
-2. Execute the verification script in another:
-   ```bash
-   ./verify.sh
-   ```
+| Endpoint | Method | Authentication | Purpose |
+|---|---|---|---|
+| `/register` | POST | None | Create user |
+| `/login` | POST | None | Authenticate user |
+| `/refresh` | POST | None | Refresh access token |
+| `/logout` | POST | None | Revoke refresh session |
+| `/todos/` | POST | Bearer | Create task |
+| `/todos/` | GET | Bearer | List/search/filter tasks |
+| `/todos/{id}` | PUT | Bearer | Update task |
+| `/todos/{id}` | DELETE | Bearer | Delete task |
 
----
+## 🛡️ Security
 
-## 📝 API Endpoint Reference
+The project demonstrates:
 
-| Endpoint | Method | Authentication | Request Body | Description |
-|---|---|---|---|---|
-| `/register` | `POST` | None | `{ name, email, password }` | Registers a new user and returns access & refresh tokens. |
-| `/login` | `POST` | None | `{ email, password }` | Authenticates credentials and returns access & refresh tokens. |
-| `/refresh` | `POST` | None | `{ refreshToken }` | Validates refresh session and returns a new access token. |
-| `/logout` | `POST` | None | `{ refreshToken }` | Invalidates the refresh token session in the database. |
-| `/todos/` | `POST` | Bearer Token | `{ title, description }` | Creates a new to-do task. |
-| `/todos/` | `GET` | Bearer Token | Query Params: `page`, `limit`, `completed`, `search`, `sort_by`, `sort_order` | Returns a paginated and filtered list of the user's tasks. |
-| `/todos/{id}` | `PUT` | Bearer Token | `{ title, description, completed }` | Modifies a task. Guards against unauthorized access (403). |
-| `/todos/{id}` | `DELETE` | Bearer Token | None | Prunes a task. Guards against unauthorized access (403). |
+- Password hashing
+- JWT authentication
+- Refresh-token session management
+- Authorization based on task ownership
+- Input validation
+- Rate limiting
+- Environment-based secret configuration
+
+## 💼 Skills demonstrated
+
+**Backend Development • REST API Design • Authentication • Authorization • Database Design • API Security • Automated Testing • Python**
+
+Relevant for **Python Developer, Backend Developer and Software Engineer** internship/fresher roles.
+
+## 👨‍💻 Author
+
+**Purushotham Balamurali**
+
+[GitHub](https://github.com/pbalamurali74-hue) • [LinkedIn](https://www.linkedin.com/in/purushothambalamurali/)
